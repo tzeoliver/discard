@@ -17,7 +17,7 @@ $(function() {
     }
 
     function createCard(suit, value) {
-        var card = $('<div class="card"><div class="frontface"></div><div class="backface"></div></div>').draggable();
+        var card = $('<div class="card" id="'+suit+'.'+value+'"><div class="frontface"></div><div class="backface"></div></div>').draggable();
 
         card.find(".frontface").css("background-position", (-(value-1) * 167.538) + "px " + (-suit * 243.2) + "px");
 	
@@ -31,13 +31,27 @@ $(function() {
         return card;
     }
 
+	function shuffleArray(array) {
+		for (var i = array.length - 1; i > 0; i--) {
+		    var j = Math.floor(Math.random() * (i + 1));
+		    var temp = array[i];
+		    array[i] = array[j];
+		    array[j] = temp;
+		}
+		return array;
+	}
+
 	function createPack() {
-		var cards=0;
+		var cards = new Array();
 		for (var i = 0; i < 4; i++){
-			for (var j=0; j < 13; j++){
-			    $("body").append(createCard(i, j));
-				cards++;
+			for (var j=1; j < 14; j++){
+			    cards.push(createCard(i,j));
 			}
+		}
+		cards = shuffleArray(cards);
+	
+		for (var i=0; i < cards.length; i++) {
+			$("body").append(cards[i]);
 		}
 		console.log(cards);
 	}
