@@ -14,10 +14,6 @@ $(function() {
         $(this).toggleClass("backfacing");
         socket.emit("backfacing", $(this).hasClass("backfacing"));
         animateFlip(this);
-		//$(this).children.toggleClass("backface");
-	
-		console.log($(this).children());
-	
     }
 
     function createCard(suit, value) {
