@@ -12,12 +12,15 @@ import player_classes
 from threading import Lock
 
 class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastMixin):	
+	players = []
 	deck = card_classes.Deck()
-	mutex = Lock()
-
+	deck_mutex = Lock()
+	game_initialized = False
 
 	def initialize(self):
-		CardNamespace.deck.shuffle_deck()
+		if CardNamespace.game_initialized == False: 
+			CardNamespace.deck.shuffle_deck()
+			game_initialized = True
 		print "initialized"
 
 	def on_move(self, position):
@@ -31,11 +34,16 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 		
 	def on_request_cards(self, card_number):
 		print "card requested"
-		CardNamespace.mutex.acquire()
+		CardNamespace.deck_mutex.acquire()
 		cards = CardNamespace.deck.pop_cards(card_number)
-		CardNamespace.mutex.release()
+		CardNamespace.deck_mutex.release()
 		print cards
 		self.emit("request_cards", cards)
+		
+	def on_registration(self):
+		# New player is entering the game, creating an id and sending it back
+		print "stubbi"
+		
 
 @bottle.route("/socket.io/<remaining:path>")
 def socketIO(remaining):
