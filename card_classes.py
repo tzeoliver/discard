@@ -2,10 +2,9 @@
 
 import random
 
-class Deck():
-	cards = []
-	
-	def __init__(self):
+class Deck():		
+	def __init__(self):		
+		self.cards = []
 		for i in range(0, 4):
 			for j in range(0, 13):
 				self.cards.append((i,j))
@@ -27,20 +26,19 @@ class Deck():
 		return card_list
 
 class Hand():
-	cards = []
+	def __init__(self):
+		cards = []
 	
 	def insert_hand(self, hand):
 		self.cards = hand 
 
 class Card():
-	backwards = False
 	
-	location = "" # DECK, TABLE OR PLAYER
-	x_c = 0
-	y_c = 0
-	
-	def __init__(self):
-		self.location = "DECK"
+	def __init__(self):		
+		self.backwards = False		
+		self.location = "DECK"		
+		self.x_c = 0
+		self.y_c = 0
 	
 	def flip_card(self):
 		self.backwards = -self.backwards
