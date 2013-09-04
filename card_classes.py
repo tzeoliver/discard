@@ -21,7 +21,7 @@ class Deck():
 	def reset_deck(self):
 		self.initialize_decks()
 			
-	def pop_cards(self, no_of_cards, player_id):
+	def pop_cards(self, no_of_cards):
 		card_list = []
 		for i in range(0, no_of_cards):
 			card = self.cards.pop(0)
@@ -42,7 +42,7 @@ class Hand():
 		self.cards.append(card)
 		
 	def remove_card(self, suit_value_pair):
-		for i in range(0, len(self.cards):
+		for i in range(0, len(self.cards)):
 			if suit_value_pair == self.cards[i].get_suit_and_value():
 				card = self.cards.pop(i)
 				return card
@@ -57,7 +57,7 @@ class Card():
 		self.suit = c_suit
 		self.value = c_value
 		self.backwards = False		
-		self.location = DECK
+		self.location = self.DECK
 		self.x_c = 0
 		self.y_c = 0
 	

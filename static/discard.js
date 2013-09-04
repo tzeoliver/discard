@@ -34,11 +34,11 @@ $(function() {
     socket.emit("request_cards", 2);    	// to be replaced by registration
     
     socket.on("request_cards", function(cards) {
-		console.log(cards[0][0]);	
+		console.log(cards[0]);	
 		console.log(cards[1]);	
 		var card_list = new Array();
-		card_list.push(createCard(cards[0][0], cards[0][1]));
-		card_list.push(createCard(cards[1][0], cards[1][1]));		
+		card_list.push(createCard(cards[0], cards[1]));
+		//card_list.push(createCard(cards[1][0], cards[1][1]));		
 		$("body").append(card_list);
 	});    
 

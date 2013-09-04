@@ -37,8 +37,8 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 		CardNamespace.deck_mutex.acquire()
 		cards = CardNamespace.deck.pop_cards(card_number)
 		CardNamespace.deck_mutex.release()
-		print cards
-		self.emit("request_cards", cards)
+		print cards[0].get_suit_and_value()
+		self.emit("request_cards", cards[0].get_suit_and_value())
 		
 	def on_registration(self):
 		# New player is entering the game, creating an id and sending it back
