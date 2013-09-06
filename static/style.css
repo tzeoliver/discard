@@ -1,14 +1,12 @@
-body {
+    body {
     -webkit-transform-style:    preserve-3d;
     -webkit-perspective:        2000px;
-	position					relative;
 }
 
 .card {
     width:                      167px;
     height:                     243px;
     position:                   absolute;
-	margin-bottom: 				-243px;
     -webkit-transition:         -webkit-transform 0.2s ease-out;
 }
 
