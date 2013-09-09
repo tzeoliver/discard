@@ -2,9 +2,27 @@
 
 import random
 
-class Deck():		
+
+class CardHolder():
+	
+	def __init__(self):
+		self.cards = []		
+		
+	def insert_cards(self, card_list):
+		for i in range(len(card_list)):
+			self.cards.append(card_list[i])
+		
+	def pop_cards(self, suit_value_pair_list):
+		card_list = []
+		for i in range(0, no_of_cards):
+			if self.cards[i].get_suit_and_value() == suit_value_pair_list[i]:
+				card = self.cards.pop(i)
+				card_list.append(card)
+		return card_list
+
+class Deck(CardHolder):		
 	def __init__(self):		
-		self.cards = []
+		CardHolder.__init__(self)
 		self.initialize_deck()
 		
 	def initialize_deck(self):
@@ -28,44 +46,18 @@ class Deck():
 			card_list.append(card)
 
 		return card_list
-		
-	def insert_cards(self, card_list):
-		for i in range(0, len(card_list)):
-			self.cards.append(card_list[i])
-					
-class Hand():
-	
-	def __init__(self):
-		self.cards = []
-		
-	def insert_card(self, card):
-		self.cards.append(card)
-		
-	def remove_card(self, suit_value_pair):
-		for i in range(0, len(self.cards)):
-			if suit_value_pair == self.cards[i].get_suit_and_value():
-				card = self.cards.pop(i)
-				return card
 
 class Card():
-	# alternatives for location of the card
-	DECK = 0
-	PLAYER = 1
-	TABLE = 2
 	
 	def __init__(self, c_suit, c_value):		
 		self.suit = c_suit
 		self.value = c_value
 		self.backwards = False		
-		self.location = self.DECK
 		self.x_c = 0
 		self.y_c = 0
 	
 	def flip_card(self):
 		self.backwards = -self.backwards
-		
-	def change_location(self, where):
-		self.location = where
 		
 	def change_coordinates(self, y, x):
 		self.x_c = x

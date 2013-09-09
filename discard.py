@@ -41,7 +41,7 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 		self.emit("request_cards", cards[0].get_suit_and_value())
 		
 	def on_registration(self):
-		# New player is entering the game, creating an id and sending it back
+		# New player is entering the game, creating an id and sendi
 		print "stubbi"
 		
 

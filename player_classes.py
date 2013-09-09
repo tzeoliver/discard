@@ -5,7 +5,7 @@ class Player:
 		
 	def __init__(self, id_num):
 		self.id_number = id_num
-		self.hand = Hand()
+		self.hand = CardHolder()
 		
 	def get_hand():
 		return self.hand
