@@ -1,3 +1,8 @@
+import sys
+sys.path.insert(0, "lib/gevent-0.13.8")
+sys.path.insert(0, "lib/bottle")
+sys.path.insert(0, "lib/gevent-socketio")
+
 import gevent.monkey
 gevent.monkey.patch_all()
 
