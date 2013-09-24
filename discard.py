@@ -3,6 +3,8 @@ sys.path.insert(0, "lib/gevent-0.13.8")
 sys.path.insert(0, "lib/bottle")
 sys.path.insert(0, "lib/gevent-socketio")
 
+import random
+
 import gevent.monkey
 gevent.monkey.patch_all()
 
@@ -25,12 +27,8 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 	player_mutex = Lock()
 
 	cards = {}
-
-	deck = card_classes.Deck()
-	deck_mutex = Lock()
-
-	table = card_classes.CardHolder()
-	table_mutex = Lock()
+	deck = []
+	table = []
 
 	id_numbers = []
 	id_mutex = Lock()
@@ -43,8 +41,17 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 			for i in range(2, 51):
 				CardNamespace.id_numbers.append(i)
 
-			for card in CardNamespace.deck.cards:
-				CardNamespace.cards[card.id] = card
+			for i in range(0, 4):
+				for j in range(1, 14):
+					card = card_classes.Card(i, j)
+					CardNamespace.cards[card.id] = card
+					CardNamespace.deck.append(card)
+
+			random.shuffle(CardNamespace.deck)
+
+			for i, card in enumerate(CardNamespace.deck):
+				card.x_c = i * 0.5
+				card.y_c = i * 0.5
 
 			CardNamespace.initialized = True
 
@@ -52,8 +59,12 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 
 	def on_get_state(self):
 		deck = []
-		for card in CardNamespace.deck.cards:
+		for card in CardNamespace.deck:
 			deck.append(card.id)
+
+		table = []
+		for card in CardNamespace.table:
+			table.append(card.id)
 
 		cards = []
 		for card in CardNamespace.cards.itervalues():
@@ -63,12 +74,14 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 									  "backfacing": card.backwards})
 
 		state = {"deck": deck,
+						 "table": table,
 						 "cards": cards}
 		self.emit("set_state", state)
 
 	def on_pop(self):
 		print "pop"
-		CardNamespace.deck.pop_cards(1)
+		card = CardNamespace.deck.pop()
+		CardNamespace.table.append(card)
 		self.broadcast_event_not_me("pop")
 
 	def on_start_drag(self, card_id):

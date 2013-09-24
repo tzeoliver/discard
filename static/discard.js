@@ -94,16 +94,21 @@ $(function() {
 
     makeCardDraggable(_.last(deck));
 
+    _.forEach(state.table, function(cardID) {
+      var card = $("#" + cardID);
+      makeCardDraggable(card);
+    });
+
     _.forEach(state.cards, function(cardState) {
       var card = $("#" + cardState.id);
       card.css("left", cardState.x);
       card.css("top", cardState.y);
       if(cardState.backfacing) {
         card.addClass("backfacing");
-        card.css("transition", "rotateY(180deg)");
+        card.css("transform", "rotateY(180deg)");
       } else {
         card.removeClass("backfacing");
-        card.css("transition", "rotateY(0deg)");
+        card.css("transform", "rotateY(0deg)");
       }
     });
   })
