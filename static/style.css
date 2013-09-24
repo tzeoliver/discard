@@ -12,6 +12,9 @@ body {
     height:                     243px;
     position:                   absolute;
     -webkit-transition:         -webkit-transform 0.2s ease-out;
+
+    /* Backfacing by default */
+    -webkit-transform:          rotateY(180deg);
 }
 
 .card .backface, .card .frontface {

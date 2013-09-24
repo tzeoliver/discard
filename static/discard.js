@@ -17,7 +17,7 @@ $(function() {
     }
 
     function createCard(suit, value) {
-        var card = $('<div class="card" id="'+suit+'-'+value+'"><div class="frontface"></div><div class="backface"></div></div>').draggable();
+        var card = $('<div class="card backfacing" id="'+suit+'-'+value+'"><div class="frontface"></div><div class="backface"></div></div>').draggable();
 
         card.find(".frontface").css("background-position", (-(value-1) * 167.538) + "px " + (-suit * 243.2) + "px");
 
