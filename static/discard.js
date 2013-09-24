@@ -17,7 +17,7 @@ $(function() {
     }
 
     function createCard(suit, value) {
-        var card = $('<div class="card"><div class="frontface"></div><div class="backface"></div></div>').draggable();
+        var card = $('<div class="card" id="'+suit+'-'+value+'"><div class="frontface"></div><div class="backface"></div></div>').draggable();
 
         card.find(".frontface").css("background-position", (-(value-1) * 167.538) + "px " + (-suit * 243.2) + "px");
 
@@ -30,7 +30,22 @@ $(function() {
         return card;
     }
 
-    $("body").append(createCard(0, 7));
+	function createDeck() {
+		var cards = new Array();
+		for(var i = 0; i < 4; i++) {
+			for(var j = 1; j < 14; j++) {
+			    cards.push(createCard(i, j));
+			}
+		}
+		cards = _.shuffle(cards);
+	
+		for(var i = 0; i < cards.length; i++) {
+			$("body").append(cards[i]);
+		}
+		console.log(cards);
+	}
+
+	createDeck();
 
     socket.emit("registration");
 
