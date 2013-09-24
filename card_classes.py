@@ -76,7 +76,7 @@ class Deck(CardHolder):
 
 		card_list = []
 		for i in range(0, no_of_cards):
-			card = self.cards.pop(0)
+			card = self.cards.pop()
 			card_list.append(card)
 
 		return card_list

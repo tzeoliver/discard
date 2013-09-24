@@ -66,14 +66,18 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 						 "cards": cards}
 		self.emit("set_state", state)
 
-	def on_pop_card(self):
-		print "pop_card"
+	def on_pop(self):
+		print "pop"
 		CardNamespace.deck.pop_cards(1)
-		self.broadcast_event_not_me("pop_card")
+		self.broadcast_event_not_me("pop")
 
 	def on_start_drag(self, card_id):
 		print "start_drag", card_id
 		self.broadcast_event_not_me("start_drag", card_id)
+
+	def on_end_drag(self, card_id):
+		print "end_drag", card_id
+		self.broadcast_event_not_me("end_drag", card_id)
 
 	def on_move(self, card_id, x, y):
 		#print "move", card_id, x, y
@@ -82,9 +86,10 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 		card.y_c = y
 		self.broadcast_event_not_me("move", card_id, x, y)
 
-	def on_backfacing(self, backfacing):
-		print "Backfacing", backfacing
-		self.broadcast_event_not_me("backfacing", backfacing)
+	def on_flip(self, card_id, backfacing):
+		print "flip", card_id, backfacing
+		self.cards[card_id].backwards = backfacing
+		self.broadcast_event_not_me("flip", card_id, backfacing)
 
 	def on_reset_game(self):
 		# resets game --> initializes deck and removes cards from players

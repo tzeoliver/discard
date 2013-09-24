@@ -8,24 +8,25 @@ $(function() {
   var player_id = 0;
 
   function animateFlip(card) {
-    if($(card).hasClass("backfacing")){
-      $(card).transition({queue: false, rotateY: "180deg"});
+    if(card.hasClass("backfacing")){
+      card.transition({queue: false, rotateY: "180deg"});
     } else {
-      $(card).transition({queue: false, rotateY: "0deg"});
+      card.transition({queue: false, rotateY: "0deg"});
     }
   }
 
   function flipCard() {
-    if($(this).hasClass("in_deck")) {
+    var card = $(this);
+
+    if(card.hasClass("in_deck")) {
       // Cards in the deck cannot be flipped.
       return;
     }
 
-    $(this).toggleClass("backfacing");
-    socket.emit("backfacing", $(this).hasClass("backfacing"));
-    animateFlip(this);
+    card.toggleClass("backfacing");
+    socket.emit("flip", card.attr("id"), card.hasClass("backfacing"));
+    animateFlip(card);
   }
-
 
   function createCard(suit, value) {
     var card = $('<div class="card" id="'+suit+'-'+value+'"><div class="frontface"></div><div class="backface"></div></div>')
@@ -44,7 +45,7 @@ $(function() {
       console.log("dragstart " + card.attr("id"));
       if(card.hasClass("in_deck")) {
         removeTopCardFromDeck();
-        socket.emit("pop_card");
+        socket.emit("pop");
       }
       socket.emit("start_drag", card.attr("id"));
     });
@@ -99,10 +100,10 @@ $(function() {
       card.css("top", cardState.y);
       if(cardState.backfacing) {
         card.addClass("backfacing");
-        card.css("-webkit-transition", "rotateY(180deg)");
+        card.css("transition", "rotateY(180deg)");
       } else {
         card.removeClass("backfacing");
-        card.css("-webkit-transition", "rotateY(0deg)");
+        card.css("transition", "rotateY(0deg)");
       }
     });
   })
@@ -124,11 +125,10 @@ $(function() {
     socket.emit("request_cards", player_id, 2);
   });
 
-  socket.on("pop_card", function() {
-    console.log("pop_card");
+  socket.on("pop", function() {
+    console.log("pop");
     var card = removeTopCardFromDeck();
     console.log(card.attr("id"));
-    card.draggable("disable");
   });
 
   socket.on("start_drag", function(cardID) {
@@ -147,10 +147,15 @@ $(function() {
     $("#" + cardID).css("top", y);
   });
 
-  socket.on("backfacing", function(backfacing) {
-    console.log("Backfacing", backfacing);
-    $(".card").toggleClass("backfacing", backfacing);
-    animateFlip($(".card"));
+  socket.on("flip", function(cardID, backfacing) {
+    console.log("flip", cardID, backfacing);
+    var card = $("#" + cardID);
+    if(backfacing) {
+      card.addClass("backfacing");
+    } else {
+      card.removeClass("backfacing");
+    }
+    animateFlip(card);
   });
 
   socket.on("reset_game", function() {
