@@ -9,9 +9,9 @@ $(function() {
 
   function animateFlip(card) {
     if(card.hasClass("backfacing")){
-      card.transition({queue: false, rotateY: "180deg"});
+      card.transition({queue: false, rotateY: "180deg"}, 200);
     } else {
-      card.transition({queue: false, rotateY: "0deg"});
+      card.transition({queue: false, rotateY: "0deg"}, 200);
     }
   }
 
@@ -31,7 +31,7 @@ $(function() {
   function createCard(suit, value) {
     var card = $('<div class="card" id="'+suit+'-'+value+'"><div class="frontface"></div><div class="backface"></div></div>')
 
-    card.find(".frontface").css("background-position", (-(value-1) * 167.538) + "px " + (-suit * 243.2) + "px");
+    card.find(".frontface").css("background-position", (-(value-1) * 83.769) + "px " + (-suit * 121.6) + "px");
 
     card.on("drag", function(event, ui) {
       var card = $(this);

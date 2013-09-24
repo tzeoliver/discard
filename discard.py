@@ -50,8 +50,8 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 			random.shuffle(CardNamespace.deck)
 
 			for i, card in enumerate(CardNamespace.deck):
-				card.x_c = i * 0.5
-				card.y_c = i * 0.5
+				card.x_c = 10 + i * 0.5
+				card.y_c = 10 + i * 0.5
 
 			CardNamespace.initialized = True
 
