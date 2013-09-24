@@ -35,24 +35,28 @@ $(function() {
   }
 
   function createDeck() {
-      var cards = new Array();
-      for(var i = 0; i < 4; i++) {
-          for(var j = 1; j < 14; j++) {
-            var card = createCard(i, j);
-            cards.push(card);
-          }
+    var cards = new Array();
+    for(var i = 0; i < 4; i++) {
+      for(var j = 1; j < 14; j++) {
+        var card = createCard(i, j);
+        card.css("pointer-events", "none");
+        cards.push(card);
       }
+    }
 
-      cards = _.shuffle(cards);
+    cards = _.shuffle(cards);
 
-      for(var i = 0; i < cards.length; i++) {
-          var card = cards[i];
-          card.css("left", i * 0.5 + "px");
-          card.css("top", i * 0.5 + "px");
-          card.css("z-index", i);
-          $("body").append(card);
-      }
-      console.log(cards);
+    for(var i = 0; i < cards.length; i++) {
+      var card = cards[i];
+      card.css("left", i * 0.5 + "px");
+      card.css("top", i * 0.5 + "px");
+      card.css("z-index", i);
+      $("body").append(card);
+    }
+
+    var lastCard = cards[cards.length-1];
+    lastCard.draggable({stack: ".card"});
+    lastCard.css("pointer-events", "auto");
   }
 
   createDeck();
