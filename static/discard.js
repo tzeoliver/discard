@@ -31,26 +31,25 @@ $(function() {
     }
 
     $("body").append(createCard(0, 7));
-    
+
     socket.emit("registration");
-    
+
     socket.on("request_cards", function(cards) {
-		console.log("Cards received");
-		console.log(cards[0]);	
-		console.log(cards[1]);	
-		var card_list = new Array();
-		card_list.push(createCard(cards[0][0], cards[0][1]));
-		//card_list.push(createCard(cards[1][0], cards[1][1]));		
-		$("body").append(card_list);
-	});    
-	
-	socket.on("registration", function(id_number) {
-		console.log(id_number);
-		player_id = id_number;
-		console.log(player_id);
-		socket.emit("request_cards", player_id, 2);
-		
-	});
+        console.log("Cards received");
+        console.log(cards[0]);
+        console.log(cards[1]);
+        var card_list = new Array();
+        card_list.push(createCard(cards[0][0], cards[0][1]));
+        //card_list.push(createCard(cards[1][0], cards[1][1]));
+        $("body").append(card_list);
+    });
+
+    socket.on("registration", function(id_number) {
+        console.log(id_number);
+        player_id = id_number;
+        console.log(player_id);
+        socket.emit("request_cards", player_id, 2);
+    });
 
     socket.on("move", function(position) {
         $(".card").transition({queue: false, x: position[1], y: position[0]});
@@ -61,15 +60,14 @@ $(function() {
         $(".card").toggleClass("backfacing", backfacing);
         animateFlip($(".card"));
     });
-    
+
     socket.on("reset_game", function() {
-		// todo: remove cards from table and players
-		console.log("removing");
-	});
-	socket.on("shuffle_deck", function(player_id_who_shuffled) {
-		// todo: inform that the deck has been shuffled and by who
-		console.log("deck shuffled by:");
-		console.log(player_id_who_shuffled);
-	});
-	
+        // todo: remove cards from table and players
+        console.log("removing");
+    });
+    socket.on("shuffle_deck", function(player_id_who_shuffled) {
+        // todo: inform that the deck has been shuffled and by who
+        console.log("deck shuffled by:");
+        console.log(player_id_who_shuffled);
+    });
 });
