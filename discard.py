@@ -35,15 +35,20 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 	id_numbers = []
 	id_mutex = Lock()
 
+	initialized = False
+
 	def initialize(self):
-		# initializing id's (0 is reserved for the table, 1 for the deck)
-		for i in range(2, 51):
-			CardNamespace.id_numbers.append(i)
+		if not CardNamespace.initialized:
+			# initializing id's (0 is reserved for the table, 1 for the deck)
+			for i in range(2, 51):
+				CardNamespace.id_numbers.append(i)
 
-		for card in CardNamespace.deck.cards:
-			CardNamespace.cards[card.id] = card
+			for card in CardNamespace.deck.cards:
+				CardNamespace.cards[card.id] = card
 
-		print "initialized"
+			CardNamespace.initialized = True
+
+			print "initialized"
 
 	def on_get_state(self):
 		deck = []

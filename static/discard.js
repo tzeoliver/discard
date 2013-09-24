@@ -34,8 +34,8 @@ $(function() {
 
     card.on("drag", function(event, ui) {
       var card = $(this);
-      console.log("drag " + card.attr("id"));
       var position = $(this).position();
+      console.log("drag " + card.attr("id") + " " + position.left + " " + position.top);
       socket.emit("move", card.attr("id"), position.left, position.top);
     });
 
@@ -137,11 +137,14 @@ $(function() {
   });
 
   socket.on("end_drag", function(cardID) {
-    $(".card").transition({queue: false, x: position[1], y: position[0]});
+    console.log("enable " + cardID);
+    $("#" + cardID).draggable("enable");
   });
 
-  socket.on("move", function(cardID, position) {
-    $("#" + cardID).transition({queue: false, x: position[1], y: position[0]});
+  socket.on("move", function(cardID, x, y) {
+    console.log("move " + cardID + " " + x + " " + y);
+    $("#" + cardID).css("left", x);
+    $("#" + cardID).css("top", y);
   });
 
   socket.on("backfacing", function(backfacing) {
