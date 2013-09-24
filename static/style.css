@@ -1,9 +1,13 @@
+html, body {
+    height:     100%;
+}
+
 body {
-    -webkit-transform-style:    preserve-3d;
-    -webkit-perspective:        2000px;
+    -webkit-perspective:        3000px;
 }
 
 .card {
+    -webkit-transform-style:    preserve-3d;
     width:                      167px;
     height:                     243px;
     position:                   absolute;
@@ -21,11 +25,4 @@ body {
 .card .backface {
     -webkit-transform:      rotateY(180deg);
     background-position:    -335.076px -972.8px;
-    visibility:             hidden;
 }
-
-/*
-.card.backfacing {
-    -webkit-transform:  rotateY(180deg);
-}
-*/
