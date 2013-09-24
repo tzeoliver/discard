@@ -55,7 +55,7 @@ class Deck(CardHolder):
 		# initializing cards and shuffling the deck
 		self.reset()
 		for i in range(0, 4):
-			for j in range(0, 13):
+			for j in range(1, 14):
 				self.cards.append(Card(i, j))
 
 		self.shuffle_deck()

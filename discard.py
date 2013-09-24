@@ -63,6 +63,7 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 
 	def on_pop_card(self):
 		print "pop_card"
+		CardNamespace.deck.pop_cards(1)
 		self.broadcast_event_not_me("pop_card")
 
 	def on_start_drag(self, card_id):
@@ -70,7 +71,7 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 		self.broadcast_event_not_me("start_drag", card_id)
 
 	def on_move(self, card_id, x, y):
-		print "move", card_id, x, y
+		#print "move", card_id, x, y
 		card = self.cards[card_id]
 		card.x_c = x
 		card.y_c = y
