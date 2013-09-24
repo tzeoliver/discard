@@ -4,6 +4,7 @@ $(function() {
   var NUM_CARDS = NUM_SUITS * NUM_CARDS_PER_SUIT;
 
   var socket = io.connect();
+  var deck = new Array();
   var player_id = 0;
 
   function animateFlip(card) {
@@ -14,19 +15,31 @@ $(function() {
     }
   }
 
-  function flipCard(card) {
+  function flipCard() {
+    if($(this).hasClass("in-deck")) {
+      // Cards in the deck cannot be flipped.
+      return;
+    }
+
     $(this).toggleClass("backfacing");
     socket.emit("backfacing", $(this).hasClass("backfacing"));
     animateFlip(this);
   }
 
+
   function createCard(suit, value) {
-    var card = $('<div class="card backfacing" id="'+suit+'-'+value+'"><div class="frontface"></div><div class="backface"></div></div>')
+    var card = $('<div class="card backfacing in-deck" id="'+suit+'-'+value+'"><div class="frontface"></div><div class="backface"></div></div>')
 
     card.find(".frontface").css("background-position", (-(value-1) * 167.538) + "px " + (-suit * 243.2) + "px");
 
-    card.on("drag", function(ev, ui) {
+    card.on("drag", function(event, ui) {
       socket.emit("move", [ui.position.top, ui.position.left]);
+    });
+
+    card.on("dragstart", function(event, ui) {
+      if(ui.helper.hasClass("in-deck")) {
+        removeTopCardFromDeck();
+      }
     });
 
     card.on("dblclick", flipCard);
@@ -35,28 +48,37 @@ $(function() {
   }
 
   function createDeck() {
-    var cards = new Array();
     for(var i = 0; i < 4; i++) {
       for(var j = 1; j < 14; j++) {
         var card = createCard(i, j);
         card.css("pointer-events", "none");
-        cards.push(card);
+        deck.push(card);
       }
     }
 
-    cards = _.shuffle(cards);
+    deck = _.shuffle(deck);
 
-    for(var i = 0; i < cards.length; i++) {
-      var card = cards[i];
+    for(var i = 0; i < deck.length; i++) {
+      var card = deck[i];
       card.css("left", i * 0.5 + "px");
       card.css("top", i * 0.5 + "px");
       card.css("z-index", i);
       $("body").append(card);
     }
 
-    var lastCard = cards[cards.length-1];
-    lastCard.draggable({stack: ".card"});
-    lastCard.css("pointer-events", "auto");
+    makeTopCardOfDeckDraggable();
+  }
+
+  function removeTopCardFromDeck() {
+    _.last(deck).removeClass("in-deck");
+    deck = _.initial(deck);
+    makeTopCardOfDeckDraggable();
+  }
+
+  function makeTopCardOfDeckDraggable() {
+    var topCard = _.last(deck);
+    topCard.draggable({stack: ".card"});
+    topCard.css("pointer-events", "auto");
   }
 
   createDeck();
