@@ -82,13 +82,16 @@ class Deck(CardHolder):
 		return card_list
 
 class Card():
-
 	def __init__(self, c_suit, c_value):
 		self.suit = c_suit
 		self.value = c_value
 		self.backwards = True
 		self.x_c = 0
 		self.y_c = 0
+
+	@property
+	def id(self):
+		return "{}-{}".format(self.suit, self.value)
 
 	def flip_card(self):
 		self.backwards = -self.backwards

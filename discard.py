@@ -24,7 +24,7 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 	players = []
 	player_mutex = Lock()
 
-	cards = []
+	cards = {}
 
 	deck = card_classes.Deck()
 	deck_mutex = Lock()
@@ -41,19 +41,18 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 			CardNamespace.id_numbers.append(i)
 
 		for card in CardNamespace.deck.cards:
-			CardNamespace.cards.append(card)
+			CardNamespace.cards[card.id] = card
 
 		print "initialized"
 
 	def on_get_state(self):
 		deck = []
 		for card in CardNamespace.deck.cards:
-			id = "{}-{}".format(card.suit, card.value)
-			deck.append(id)
+			deck.append(card.id)
 
 		cards = []
-		for card in CardNamespace.cards:
-			cards.append({"id": "{}-{}".format(card.suit, card.value),
+		for card in CardNamespace.cards.itervalues():
+			cards.append({"id": card.id,
 									  "x": card.x_c,
 									  "y": card.y_c,
 									  "backfacing": card.backwards})
@@ -70,9 +69,12 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 		print "start_drag", card_id
 		self.broadcast_event_not_me("start_drag", card_id)
 
-	def on_move(self, position):
-		print "Position", position
-		self.broadcast_event_not_me("move", position)
+	def on_move(self, card_id, x, y):
+		print "move", card_id, x, y
+		card = self.cards[card_id]
+		card.x_c = x
+		card.y_c = y
+		self.broadcast_event_not_me("move", card_id, x, y)
 
 	def on_backfacing(self, backfacing):
 		print "Backfacing", backfacing

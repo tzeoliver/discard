@@ -16,7 +16,7 @@ $(function() {
   }
 
   function flipCard() {
-    if($(this).hasClass("in-deck")) {
+    if($(this).hasClass("in_deck")) {
       // Cards in the deck cannot be flipped.
       return;
     }
@@ -28,7 +28,7 @@ $(function() {
 
 
   function createCard(suit, value) {
-    var card = $('<div class="card backfacing in-deck" id="'+suit+'-'+value+'"><div class="frontface"></div><div class="backface"></div></div>')
+    var card = $('<div class="card" id="'+suit+'-'+value+'"><div class="frontface"></div><div class="backface"></div></div>')
 
     card.find(".frontface").css("background-position", (-(value-1) * 167.538) + "px " + (-suit * 243.2) + "px");
 
@@ -36,13 +36,13 @@ $(function() {
       var card = $(this);
       console.log("drag " + card.attr("id"));
       var position = $(this).position();
-      //socket.emit("move", [position.top, position.left]);
+      socket.emit("move", card.attr("id"), position.left, position.top);
     });
 
     card.on("dragstart", function(event, ui) {
       var card = $(this);
       console.log("dragstart " + card.attr("id"));
-      if(card.hasClass("in-deck")) {
+      if(card.hasClass("in_deck")) {
         removeTopCardFromDeck();
         socket.emit("pop_card");
       }
@@ -65,7 +65,7 @@ $(function() {
 
   function removeTopCardFromDeck() {
     var topCard = _.last(deck)
-    topCard.removeClass("in-deck");
+    topCard.removeClass("in_deck");
     deck = _.initial(deck);
     makeCardDraggable(_.last(deck));
     return topCard;
@@ -84,6 +84,7 @@ $(function() {
     var i = 0;
     _.forEach(state.deck, function(cardID) {
       var card = $("#" + cardID);
+      card.addClass("in_deck");
       card.css("z-index", i);
       card.css("pointer-events", "none");
       deck.push(card);
