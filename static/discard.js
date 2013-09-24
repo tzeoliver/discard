@@ -33,13 +33,20 @@ $(function() {
     card.find(".frontface").css("background-position", (-(value-1) * 167.538) + "px " + (-suit * 243.2) + "px");
 
     card.on("drag", function(event, ui) {
-      socket.emit("move", [ui.position.top, ui.position.left]);
+      var card = $(this);
+      console.log("drag " + card.attr("id"));
+      var position = $(this).position();
+      //socket.emit("move", [position.top, position.left]);
     });
 
     card.on("dragstart", function(event, ui) {
-      if(ui.helper.hasClass("in-deck")) {
+      var card = $(this);
+      console.log("dragstart " + card.attr("id"));
+      if(card.hasClass("in-deck")) {
         removeTopCardFromDeck();
+        socket.emit("pop_card");
       }
+      socket.emit("start_drag", card.attr("id"));
     });
 
     card.on("dblclick", flipCard);
@@ -47,43 +54,57 @@ $(function() {
     return card;
   }
 
-  function createDeck() {
+  function createCards() {
     for(var i = 0; i < 4; i++) {
       for(var j = 1; j < 14; j++) {
         var card = createCard(i, j);
-        card.css("pointer-events", "none");
-        deck.push(card);
+        $("body").append(card);
       }
     }
-
-    deck = _.shuffle(deck);
-
-    for(var i = 0; i < deck.length; i++) {
-      var card = deck[i];
-      card.css("left", i * 0.5 + "px");
-      card.css("top", i * 0.5 + "px");
-      card.css("z-index", i);
-      $("body").append(card);
-    }
-
-    makeTopCardOfDeckDraggable();
   }
 
   function removeTopCardFromDeck() {
-    _.last(deck).removeClass("in-deck");
+    var topCard = _.last(deck)
+    topCard.removeClass("in-deck");
     deck = _.initial(deck);
-    makeTopCardOfDeckDraggable();
+    makeCardDraggable(_.last(deck));
+    return topCard;
   }
 
-  function makeTopCardOfDeckDraggable() {
-    var topCard = _.last(deck);
-    topCard.draggable({stack: ".card"});
-    topCard.css("pointer-events", "auto");
+  function makeCardDraggable(card) {
+    console.log("draggable " + card.attr("id"));
+    card.draggable({stack: ".card"});
+    card.css("pointer-events", "auto");
   }
 
-  createDeck();
+  socket.on("set_state", function(state) {
+    console.log("set_state");
+    console.log(state);
+    deck = new Array();
+    var i = 0;
+    _.forEach(state.deck, function(cardID) {
+      var card = $("#" + cardID);
+      card.css("z-index", i);
+      card.css("pointer-events", "none");
+      deck.push(card);
+      i += 1;
+    });
 
-  socket.emit("registration");
+    makeCardDraggable(_.last(deck));
+
+    _.forEach(state.cards, function(cardState) {
+      var card = $("#" + cardState.id);
+      card.css("left", cardState.x);
+      card.css("top", cardState.y);
+      if(cardState.backfacing) {
+        card.addClass("backfacing");
+        card.css("-webkit-transition", "rotateY(180deg)");
+      } else {
+        card.removeClass("backfacing");
+        card.css("-webkit-transition", "rotateY(0deg)");
+      }
+    });
+  })
 
   socket.on("request_cards", function(cards) {
     console.log("Cards received");
@@ -102,8 +123,24 @@ $(function() {
     socket.emit("request_cards", player_id, 2);
   });
 
-  socket.on("move", function(position) {
+  socket.on("pop_card", function() {
+    console.log("pop_card");
+    var card = removeTopCardFromDeck();
+    console.log(card.attr("id"));
+    card.draggable("disable");
+  });
+
+  socket.on("start_drag", function(cardID) {
+    console.log("disable " + cardID);
+    $("#" + cardID).draggable("disable");
+  });
+
+  socket.on("end_drag", function(cardID) {
     $(".card").transition({queue: false, x: position[1], y: position[0]});
+  });
+
+  socket.on("move", function(cardID, position) {
+    $("#" + cardID).transition({queue: false, x: position[1], y: position[0]});
   });
 
   socket.on("backfacing", function(backfacing) {
@@ -121,4 +158,8 @@ $(function() {
     console.log("deck shuffled by:");
     console.log(player_id_who_shuffled);
   });
+
+  createCards();
+
+  socket.emit("get_state");
 });

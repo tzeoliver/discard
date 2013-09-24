@@ -24,6 +24,8 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 	players = []
 	player_mutex = Lock()
 
+	cards = []
+
 	deck = card_classes.Deck()
 	deck_mutex = Lock()
 
@@ -33,18 +35,40 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 	id_numbers = []
 	id_mutex = Lock()
 
-	game_initialized = False
-
 	def initialize(self):
-		if CardNamespace.game_initialized == False:
-			CardNamespace.deck.shuffle_deck()
-			game_initialized = True
+		# initializing id's (0 is reserved for the table, 1 for the deck)
+		for i in range(2, 51):
+			CardNamespace.id_numbers.append(i)
 
-			# initializing id's (0 is reserved for the table, 1 for the deck)
-			for i in range(2, 51):
-				CardNamespace.id_numbers.append(i)
+		for card in CardNamespace.deck.cards:
+			CardNamespace.cards.append(card)
 
 		print "initialized"
+
+	def on_get_state(self):
+		deck = []
+		for card in CardNamespace.deck.cards:
+			id = "{}-{}".format(card.suit, card.value)
+			deck.append(id)
+
+		cards = []
+		for card in CardNamespace.cards:
+			cards.append({"id": "{}-{}".format(card.suit, card.value),
+									  "x": card.x_c,
+									  "y": card.y_c,
+									  "backfacing": card.backwards})
+
+		state = {"deck": deck,
+						 "cards": cards}
+		self.emit("set_state", state)
+
+	def on_pop_card(self):
+		print "pop_card"
+		self.broadcast_event_not_me("pop_card")
+
+	def on_start_drag(self, card_id):
+		print "start_drag", card_id
+		self.broadcast_event_not_me("start_drag", card_id)
 
 	def on_move(self, position):
 		print "Position", position
