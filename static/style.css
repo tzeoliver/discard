@@ -28,3 +28,9 @@ body {
     -webkit-transform:      rotateY(180deg);
     background-position:    -167.535px -486.4px;
 }
+
+.player_field {
+    background-color:   #ddd;
+    margin-top:         600px;
+    height:             100%;
+}

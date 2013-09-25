@@ -59,9 +59,13 @@ $(function() {
     for(var i = 0; i < 4; i++) {
       for(var j = 1; j < 14; j++) {
         var card = createCard(i, j);
-        $("body").append(card);
+        $("#card-container").append(card);
       }
     }
+  }
+
+  function addPlayer() {
+    $("body").append($('<div class="player_field"></div>'));
   }
 
   function removeTopCardFromDeck() {
@@ -173,7 +177,12 @@ $(function() {
     console.log(player_id_who_shuffled);
   });
 
+  window.onbeforeunload = function(e) {
+    socket.disconnect();
+  }
+
   createCards();
+  addPlayer();
 
   socket.emit("get_state");
 });
