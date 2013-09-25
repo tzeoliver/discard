@@ -29,8 +29,11 @@ body {
     background-position:    -167.535px -486.4px;
 }
 
+#table {
+    height:     600px;
+}
+
 .player_field {
     background-color:   #ddd;
-    margin-top:         600px;
     height:             100%;
 }

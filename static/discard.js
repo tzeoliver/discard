@@ -24,7 +24,18 @@ $(function() {
     }
 
     card.toggleClass("backfacing");
-    socket.emit("flip", card.attr("id"), card.hasClass("backfacing"));
+    if(!card.hasClass("in_hand")) {
+      socket.emit("flip", card.attr("id"), card.hasClass("backfacing"));
+    }
+    animateFlip(card);
+  }
+
+  function setCardBackfacing(card, backfacing) {
+    if(backfacing) {
+      card.addClass("backfacing");
+    } else {
+      card.removeClass("backfacing");
+    }
     animateFlip(card);
   }
 
@@ -36,7 +47,7 @@ $(function() {
     card.on("drag", function(event, ui) {
       var card = $(this);
       var position = $(this).position();
-      console.log("drag " + card.attr("id") + " " + position.left + " " + position.top);
+      //console.log("drag " + card.attr("id") + " " + position.left + " " + position.top);
       socket.emit("move", card.attr("id"), position.left, position.top);
     });
 
@@ -50,6 +61,12 @@ $(function() {
       socket.emit("start_drag", card.attr("id"));
     });
 
+    card.on("dragstop", function(event, ui) {
+      var card = $(this);
+      console.log("dragend " + card.attr("id"));
+      socket.emit("end_drag", card.attr("id"));
+    });
+
     card.on("dblclick", flipCard);
 
     return card;
@@ -59,13 +76,23 @@ $(function() {
     for(var i = 0; i < 4; i++) {
       for(var j = 1; j < 14; j++) {
         var card = createCard(i, j);
-        $("#card-container").append(card);
+        $("#table").append(card);
       }
     }
   }
 
   function addPlayer() {
-    $("body").append($('<div class="player_field"></div>'));
+    var field = $('<div class="player_field"></div>');
+    field.droppable({
+      drop: function(event, ui) {
+        var card = ui.draggable;
+        var id = card.attr("id");
+        console.log("to_hand", id);
+        card.addClass("in_hand");
+        socket.emit("to_hand", id);
+      }
+    });
+    $("body").append(field);
   }
 
   function removeTopCardFromDeck() {
@@ -107,13 +134,7 @@ $(function() {
       var card = $("#" + cardState.id);
       card.css("left", cardState.x);
       card.css("top", cardState.y);
-      if(cardState.backfacing) {
-        card.addClass("backfacing");
-        card.css("transform", "rotateY(180deg)");
-      } else {
-        card.removeClass("backfacing");
-        card.css("transform", "rotateY(0deg)");
-      }
+      setCardBackfacing(card, cardState.backfacing);
     });
   })
 
@@ -150,8 +171,22 @@ $(function() {
     $("#" + cardID).draggable("enable");
   });
 
+  socket.on("to_hand", function(cardID) {
+    console.log("to_hand", cardID);
+    var card = $("#" + cardID);
+    card.css("pointer-events", "none");
+    setCardBackfacing(card, true);
+  });
+
+  socket.on("from_hand", function(cardID, backfacing) {
+    console.log("to_hand", cardID);
+    var card = $("#" + cardID);
+    card.css("pointer-events", "auto");
+    setCardBackfacing(card, backfacing);
+  });
+
   socket.on("move", function(cardID, x, y) {
-    console.log("move " + cardID + " " + x + " " + y);
+    //console.log("move " + cardID + " " + x + " " + y);
     $("#" + cardID).css("left", x);
     $("#" + cardID).css("top", y);
   });
@@ -180,6 +215,18 @@ $(function() {
   window.onbeforeunload = function(e) {
     socket.disconnect();
   }
+
+  $("#table").droppable({
+    drop: function(event, ui) {
+      var card = ui.draggable;
+      if(card.hasClass("in_hand")) {
+        var id = card.attr("id");
+        console.log("from_hand", id);
+        card.removeClass("in_hand");
+        socket.emit("from_hand", id, card.hasClass("backfacing"));
+      }
+    }
+  });
 
   createCards();
   addPlayer();

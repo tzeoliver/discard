@@ -96,6 +96,14 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
     print "end_drag", card_id
     self.broadcast_event_not_me("end_drag", card_id)
 
+  def on_to_hand(self, card_id):
+    print "to_hand", self, card_id
+    self.broadcast_event_not_me("to_hand", card_id)
+
+  def on_from_hand(self, card_id, backfacing):
+    print "from_hand", self, card_id
+    self.broadcast_event_not_me("from_hand", card_id, backfacing)
+
   def on_move(self, card_id, x, y):
     #print "move", card_id, x, y
     card = self.cards[card_id]
