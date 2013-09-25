@@ -18,8 +18,8 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 
     def on_backfacing(self, backfacing):
         print "Backfacing", backfacing
-        self.broadcast_event_not_me("backfacing", backfacing)
-
+        self.broadcast_event_not_me("backfacing", backfacing)       
+        
 @bottle.route("/socket.io/<remaining:path>")
 def socketIO(remaining):
     print "Socket.io request"

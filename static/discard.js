@@ -1,5 +1,9 @@
 $(function() {
     var socket = io.connect();
+    
+    function logToLocalServer(message) {
+        $.post("http://127.0.0.1:8989", message, null ,"text");
+    }
 
     function animateFlip(card) {
         if($(card).hasClass("backfacing")){
@@ -13,6 +17,7 @@ $(function() {
         $(this).toggleClass("backfacing");
         socket.emit("backfacing", $(this).hasClass("backfacing"));
         animateFlip(this);
+        logToLocalServer("Card '"+this.id+"' was turned");
     }
 
     function createCard(suit, value) {
@@ -44,6 +49,7 @@ $(function() {
 		console.log(cards);
 	}
 
+    logToLocalServer("Joined a game");
 	createDeck();
 
     socket.on("move", function(position) {
