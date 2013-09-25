@@ -1,0 +1,35 @@
+<html>
+<head>
+<!--- älä välitä tuosta scriptistä --->
+<script> <!--- script has been taken from http://www.w3schools.com/html/html5_draganddrop.asp --->
+function allowDrop(ev){
+ev.preventDefault();
+}
+
+function drag(ev){
+ev.dataTransfer.setData("Text",ev.target.id);
+}
+
+function drop(ev){
+ev.preventDefault();
+var data=ev.dataTransfer.getData("Text");
+ev.target.appendChild(document.getElementById(data));
+}
+</script>
+<title>Gameboard</title>
+<body bgcolor = "white">
+<table border=”1”>
+<tr> <!--- begin new row --->
+<td id="others" width="1400" valign="top"><b>Other players: Anne 5 cards | Juho 5 cards | Juha 5 cards | Tomi 5 cards</b></td>
+</tr>
+<tr>
+<td id="table" width="100%" height="500"></td>
+</tr>
+<tr>
+<td id="cards" width="100%" valign="botttom" height="80"><b>My cards:</b>
+</td>
+</tr>
+</table>
+</body>
+</head>
+</html>
