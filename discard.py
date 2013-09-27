@@ -260,18 +260,11 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
         CardNamespace.players.pop(i)
     CardNamespace.player_mutex.release()
 
-<<<<<<< HEAD
-    def on_backfacing(self, backfacing):
-        print "Backfacing", backfacing
-        self.broadcast_event_not_me("backfacing", backfacing)       
-        
-=======
     # inserting id number back to the list
     CardNamespace.id_mutex.acquire()
     CardNamespace.id_numbers.append(player_id)
     CardNamespace.id_mutex.release()
 
->>>>>>> upstream/master
 @bottle.route("/socket.io/<remaining:path>")
 def socketIO(remaining):
   print "Socket.io request"
