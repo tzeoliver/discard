@@ -182,7 +182,7 @@ $(function() {
     var card = $("#" + cardID);
     card.css("pointer-events", "none");
     setCardBackfacing(card, true);
-    logToLocalServer("Moved card '"+cardID+"' to hand")
+    logToLocalServer("Moved card '"+cardID+"' to hand");
   });
 
   socket.on("from_hand", function(cardID, backfacing) {
