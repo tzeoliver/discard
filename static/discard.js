@@ -86,10 +86,12 @@ $(function() {
     field.droppable({
       drop: function(event, ui) {
         var card = ui.draggable;
-        var id = card.attr("id");
-        console.log("to_hand", id);
-        card.addClass("in_hand");
-        socket.emit("to_hand", id);
+        if(!card.hasClass("in_hand")) {
+          var id = card.attr("id");
+          console.log("to_hand", id);
+          card.addClass("in_hand");
+          socket.emit("to_hand", id);
+        }
       }
     });
     $("body").append(field);
@@ -128,6 +130,11 @@ $(function() {
     _.forEach(state.table, function(cardID) {
       var card = $("#" + cardID);
       makeCardDraggable(card);
+    });
+
+    _.forEach(state.hand, function(cardID) {
+      var card = $("#" + cardID);
+      card.addClass("in_hand");
     });
 
     _.forEach(state.cards, function(cardState) {

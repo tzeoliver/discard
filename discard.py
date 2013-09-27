@@ -28,7 +28,8 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 
   cards = {}
   deck = []
-  table = []
+  table = set()
+  hand = set()
 
   id_numbers = []
   id_mutex = Lock()
@@ -66,6 +67,10 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
     for card in CardNamespace.table:
       table.append(card.id)
 
+    hand = []
+    for card in CardNamespace.hand:
+      hand.append(card.id)
+
     cards = []
     for card in CardNamespace.cards.itervalues():
       cards.append({"id": card.id,
@@ -75,6 +80,7 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 
     state = {"deck": deck,
              "table": table,
+             "hand": hand,
              "cards": cards}
     self.emit("set_state", state)
 
@@ -85,7 +91,7 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
   def on_pop(self):
     print "pop"
     card = CardNamespace.deck.pop()
-    CardNamespace.table.append(card)
+    CardNamespace.table.add(card.id)
     self.broadcast_event_not_me("pop")
 
   def on_start_drag(self, card_id):
@@ -98,10 +104,15 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 
   def on_to_hand(self, card_id):
     print "to_hand", self, card_id
+    print CardNamespace.table
+    CardNamespace.table.remove(card_id)
+    CardNamespace.hand.add(card_id)
     self.broadcast_event_not_me("to_hand", card_id)
 
   def on_from_hand(self, card_id, backfacing):
     print "from_hand", self, card_id
+    CardNamespace.hand.remove(card_id)
+    CardNamespace.table.add(card_id)
     self.broadcast_event_not_me("from_hand", card_id, backfacing)
 
   def on_move(self, card_id, x, y):
