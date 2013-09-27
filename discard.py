@@ -117,7 +117,7 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 
   def on_to_hand(self, card_id):
     print "to_hand", self, card_id
-    print CardNamespace.table
+    CardNamespace.cards[card_id].backwards = True
     CardNamespace.table.remove(card_id)
     CardNamespace.hand.add(card_id)
     self.broadcast_event_not_me("to_hand", card_id)

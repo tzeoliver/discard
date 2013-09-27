@@ -43,3 +43,7 @@ body {
     top:        5px;
     left:       5px;
 }
+
+.card.in_other_hand {
+    opacity:    0.5;
+}
