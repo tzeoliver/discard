@@ -4,6 +4,7 @@ sys.path.insert(0, "lib/bottle")
 sys.path.insert(0, "lib/gevent-socketio")
 
 import random
+import logging
 
 import gevent.monkey
 gevent.monkey.patch_all()
@@ -18,9 +19,10 @@ from threading import Lock
 import card_classes
 import player_classes
 
-
 TABLE = 0
 DECK = 1
+
+logging.basicConfig(filename="discard.log", level=logging.INFO)
 
 class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastMixin):
   players = []
@@ -51,7 +53,7 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 
       CardNamespace.initialized = True
 
-      print "initialized"
+      logging.info("initialized")
 
   def reset_game(self):
     CardNamespace.deck = []
@@ -98,32 +100,32 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
     self.emit("set_state", self.get_state())
 
   def recv_disconnect(self):
-    print "disconnect", self
+    logging.info("disconnect {}".format(id(self)))
     self.disconnect()
 
   def on_pop(self):
-    print "pop"
+    logging.info("pop")
     card_id = CardNamespace.deck.pop()
     CardNamespace.table.add(card_id)
     self.broadcast_event_not_me("pop")
 
   def on_start_drag(self, card_id):
-    print "start_drag", card_id
+    logging.info("start_drag {}".format(card_id))
     self.broadcast_event_not_me("start_drag", card_id)
 
   def on_end_drag(self, card_id):
-    print "end_drag", card_id
+    logging.info("end_drag {}".format(card_id))
     self.broadcast_event_not_me("end_drag", card_id)
 
   def on_to_hand(self, card_id):
-    print "to_hand", self, card_id
+    logging.info("to_hand {} {}".format(id(self), card_id))
     CardNamespace.cards[card_id].backwards = True
     CardNamespace.table.remove(card_id)
     CardNamespace.hand.add(card_id)
     self.broadcast_event_not_me("to_hand", card_id)
 
   def on_from_hand(self, card_id, backfacing):
-    print "from_hand", self, card_id
+    logging.info("from_hand {} {}".format(id(self, card_id)))
     CardNamespace.hand.remove(card_id)
     CardNamespace.table.add(card_id)
     self.broadcast_event_not_me("from_hand", card_id, backfacing)
@@ -136,7 +138,7 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
     self.broadcast_event_not_me("move", card_id, x, y)
 
   def on_flip(self, card_id, backfacing):
-    print "flip", card_id, backfacing
+    logging.info("flip {}".format(card_id))
     self.cards[card_id].backwards = backfacing
     self.broadcast_event_not_me("flip", card_id, backfacing)
 
