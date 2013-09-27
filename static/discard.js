@@ -7,12 +7,17 @@ $(function() {
   var deck = new Array();
   var player_id = 0;
 
+  function logToLocalServer(message) {
+        $.post("http://127.0.0.1:8989", message, null ,"text");
+  }
+  
   function animateFlip(card) {
     if(card.hasClass("backfacing")){
       card.transition({queue: false, rotateY: "180deg"}, 200);
     } else {
       card.transition({queue: false, rotateY: "0deg"}, 200);
     }
+    logToLocalServer("Card :"+card.id+" was turned.")
   }
 
   function flipCard() {
