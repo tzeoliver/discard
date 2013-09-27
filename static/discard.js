@@ -36,7 +36,6 @@ $(function() {
     } else {
       card.removeClass("backfacing");
     }
-    animateFlip(card);
   }
 
   function createCard(suit, value) {
@@ -142,6 +141,13 @@ $(function() {
       card.css("left", cardState.x);
       card.css("top", cardState.y);
       setCardBackfacing(card, cardState.backfacing);
+
+      // No animation should be done here.
+      if(cardState.backfacing) {
+        card.css("transform", "rotateY(180deg)");
+      } else {
+        card.css("transform", "rotateY(0deg)");
+      }
     });
   })
 
@@ -183,6 +189,7 @@ $(function() {
     var card = $("#" + cardID);
     card.css("pointer-events", "none");
     setCardBackfacing(card, true);
+    animateFlip(card);
   });
 
   socket.on("from_hand", function(cardID, backfacing) {
@@ -190,6 +197,7 @@ $(function() {
     var card = $("#" + cardID);
     card.css("pointer-events", "auto");
     setCardBackfacing(card, backfacing);
+    animateFlip(card);
   });
 
   socket.on("move", function(cardID, x, y) {
@@ -233,6 +241,10 @@ $(function() {
         socket.emit("from_hand", id, card.hasClass("backfacing"));
       }
     }
+  });
+
+  $("#reset").on("click", function() {
+    socket.emit("reset_game");
   });
 
   createCards();

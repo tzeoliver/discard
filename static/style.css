@@ -37,3 +37,9 @@ body {
     background-color:   #ddd;
     height:             100%;
 }
+
+#reset {
+    position:   absolute;
+    top:        5px;
+    left:       5px;
+}
