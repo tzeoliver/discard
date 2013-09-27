@@ -17,7 +17,7 @@ $(function() {
     } else {
       card.transition({queue: false, rotateY: "0deg"}, 200);
     }
-    logToLocalServer("Card :"+card.id+" was turned.")
+    logToLocalServer("Card :"+card.id+" was turned.");
   }
 
   function flipCard() {
@@ -158,6 +158,7 @@ $(function() {
     player_id = id_number;
     console.log(player_id);
     socket.emit("request_cards", player_id, 2);
+    logToLocalServer("Registered to game with id:"+player_id);
   });
 
   socket.on("pop", function() {
@@ -181,6 +182,7 @@ $(function() {
     var card = $("#" + cardID);
     card.css("pointer-events", "none");
     setCardBackfacing(card, true);
+    logToLocalServer("Moved card '"+cardID+"' to hand")
   });
 
   socket.on("from_hand", function(cardID, backfacing) {
@@ -188,6 +190,7 @@ $(function() {
     var card = $("#" + cardID);
     card.css("pointer-events", "auto");
     setCardBackfacing(card, backfacing);
+    logToLocalServer("Moved card '"+cardID+"' from hand");
   });
 
   socket.on("move", function(cardID, x, y) {
@@ -210,11 +213,13 @@ $(function() {
   socket.on("reset_game", function() {
     // todo: remove cards from table and players
     console.log("removing");
+    logToLocalServer("Game was reseted");
   });
   socket.on("shuffle_deck", function(player_id_who_shuffled) {
     // todo: inform that the deck has been shuffled and by who
     console.log("deck shuffled by:");
     console.log(player_id_who_shuffled);
+    logToLocalServer("Deck was shuffled.");
   });
 
   window.onbeforeunload = function(e) {
