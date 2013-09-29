@@ -197,6 +197,7 @@ $(function() {
     card.css("pointer-events", "none");
     setCardBackfacing(card, true);
     animateFlip(card);
+    logToLocalServer("Moved card '"+cardID+"' to hand");
   });
 
   socket.on("from_hand", function(cardID, backfacing) {
@@ -206,6 +207,7 @@ $(function() {
     card.css("pointer-events", "auto");
     setCardBackfacing(card, backfacing);
     animateFlip(card);
+    logToLocalServer("Moved card '"+cardID+"' from hand");
   });
 
   socket.on("move", function(cardID, x, y) {
