@@ -4,7 +4,7 @@ sys.path.insert(0, "lib/bottle")
 import bottle
 import logging
 
-logging.basicConfig(filename='example.log',format='%(asctime)s %(message)s',datefmt='%d/%m/%Y %H:%M:%S',level=logging.DEBUG)
+logging.basicConfig(filename='localDiscard.log',format='%(asctime)s %(message)s',datefmt='%d/%m/%Y %H:%M:%S',level=logging.DEBUG)
 logging.info("--- New session started ---")
 
 @bottle.post('/')

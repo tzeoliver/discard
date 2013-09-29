@@ -17,7 +17,7 @@ $(function() {
     } else {
       card.transition({queue: false, rotateY: "0deg"}, 200);
     }
-    logToLocalServer("Card :"+card.id+" was turned.");
+    logToLocalServer("Card :"+ card.attr("id") +" was turned.");
   }
 
   function flipCard() {
