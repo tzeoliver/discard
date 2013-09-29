@@ -29,7 +29,7 @@ $(function() {
     }
 
     card.toggleClass("backfacing");
-    if(!card.hasClass("in_hand")) {
+    if(!card.hasClass("in_own_hand")) {
       socket.emit("flip", card.attr("id"), card.hasClass("backfacing"));
     }
     animateFlip(card);
@@ -41,7 +41,6 @@ $(function() {
     } else {
       card.removeClass("backfacing");
     }
-    animateFlip(card);
   }
 
   function createCard(suit, value) {
@@ -91,10 +90,12 @@ $(function() {
     field.droppable({
       drop: function(event, ui) {
         var card = ui.draggable;
-        var id = card.attr("id");
-        console.log("to_hand", id);
-        card.addClass("in_hand");
-        socket.emit("to_hand", id);
+        if(!card.hasClass("in_own_hand")) {
+          var id = card.attr("id");
+          console.log("to_hand", id);
+          card.addClass("in_own_hand");
+          socket.emit("to_hand", id);
+        }
       }
     });
     $("body").append(field);
@@ -135,11 +136,23 @@ $(function() {
       makeCardDraggable(card);
     });
 
+    _.forEach(state.hand, function(cardID) {
+      var card = $("#" + cardID);
+      card.addClass("in_other_hand");
+    });
+
     _.forEach(state.cards, function(cardState) {
       var card = $("#" + cardState.id);
       card.css("left", cardState.x);
       card.css("top", cardState.y);
       setCardBackfacing(card, cardState.backfacing);
+
+      // No animation should be done here.
+      if(cardState.backfacing) {
+        card.css("transform", "rotateY(180deg)");
+      } else {
+        card.css("transform", "rotateY(0deg)");
+      }
     });
   })
 
@@ -180,17 +193,19 @@ $(function() {
   socket.on("to_hand", function(cardID) {
     console.log("to_hand", cardID);
     var card = $("#" + cardID);
+    card.addClass("in_other_hand");
     card.css("pointer-events", "none");
     setCardBackfacing(card, true);
-    logToLocalServer("Moved card '"+cardID+"' to hand");
+    animateFlip(card);
   });
 
   socket.on("from_hand", function(cardID, backfacing) {
     console.log("to_hand", cardID);
     var card = $("#" + cardID);
+    card.removeClass("in_other_hand");
     card.css("pointer-events", "auto");
     setCardBackfacing(card, backfacing);
-    logToLocalServer("Moved card '"+cardID+"' from hand");
+    animateFlip(card);
   });
 
   socket.on("move", function(cardID, x, y) {
@@ -229,13 +244,17 @@ $(function() {
   $("#table").droppable({
     drop: function(event, ui) {
       var card = ui.draggable;
-      if(card.hasClass("in_hand")) {
+      if(card.hasClass("in_own_hand")) {
         var id = card.attr("id");
         console.log("from_hand", id);
-        card.removeClass("in_hand");
+        card.removeClass("in_own_hand");
         socket.emit("from_hand", id, card.hasClass("backfacing"));
       }
     }
+  });
+
+  $("#reset").on("click", function() {
+    socket.emit("reset_game");
   });
 
   createCards();

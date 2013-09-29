@@ -4,6 +4,7 @@ sys.path.insert(0, "lib/bottle")
 sys.path.insert(0, "lib/gevent-socketio")
 
 import random
+import logging
 
 import gevent.monkey
 gevent.monkey.patch_all()
@@ -18,9 +19,10 @@ from threading import Lock
 import card_classes
 import player_classes
 
-
 TABLE = 0
 DECK = 1
+
+logging.basicConfig(filename="discard.log", level=logging.INFO)
 
 class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastMixin):
   players = []
@@ -28,7 +30,8 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
 
   cards = {}
   deck = []
-  table = []
+  table = set()
+  hand = set()
 
   id_numbers = []
   id_mutex = Lock()
@@ -45,26 +48,41 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
         for j in range(1, 14):
           card = card_classes.Card(i, j)
           CardNamespace.cards[card.id] = card
-          CardNamespace.deck.append(card)
 
-      random.shuffle(CardNamespace.deck)
-
-      for i, card in enumerate(CardNamespace.deck):
-        card.x_c = 5 + i * 0.5
-        card.y_c = 5 + i * 0.5
+      self.reset_game()
 
       CardNamespace.initialized = True
 
-      print "initialized"
+      logging.info("initialized")
 
-  def on_get_state(self):
+  def reset_game(self):
+    CardNamespace.deck = []
+    CardNamespace.table = set()
+    CardNamespace.hand = set()
+
+    for card in CardNamespace.cards.itervalues():
+        card.backwards = True
+        CardNamespace.deck.append(card.id)
+
+    random.shuffle(CardNamespace.deck)
+
+    for i, card_id in enumerate(CardNamespace.deck):
+      card = CardNamespace.cards[card_id]
+      card.x_c = 5 + i * 0.5
+      card.y_c = 35 + i * 0.5
+
+  def get_state(self):
     deck = []
-    for card in CardNamespace.deck:
-      deck.append(card.id)
+    for card_id in CardNamespace.deck:
+      deck.append(card_id)
 
     table = []
-    for card in CardNamespace.table:
-      table.append(card.id)
+    for card_id in CardNamespace.table:
+      table.append(card_id)
+
+    hand = []
+    for card_id in CardNamespace.hand:
+      hand.append(card_id)
 
     cards = []
     for card in CardNamespace.cards.itervalues():
@@ -73,35 +91,43 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
                     "y": card.y_c,
                     "backfacing": card.backwards})
 
-    state = {"deck": deck,
-             "table": table,
-             "cards": cards}
-    self.emit("set_state", state)
+    return {"deck": deck,
+            "table": table,
+            "hand": hand,
+            "cards": cards}
+
+  def on_get_state(self):
+    self.emit("set_state", self.get_state())
 
   def recv_disconnect(self):
-    print "disconnect", self
+    logging.info("disconnect {}".format(id(self)))
     self.disconnect()
 
   def on_pop(self):
-    print "pop"
-    card = CardNamespace.deck.pop()
-    CardNamespace.table.append(card)
+    logging.info("pop")
+    card_id = CardNamespace.deck.pop()
+    CardNamespace.table.add(card_id)
     self.broadcast_event_not_me("pop")
 
   def on_start_drag(self, card_id):
-    print "start_drag", card_id
+    logging.info("start_drag {}".format(card_id))
     self.broadcast_event_not_me("start_drag", card_id)
 
   def on_end_drag(self, card_id):
-    print "end_drag", card_id
+    logging.info("end_drag {}".format(card_id))
     self.broadcast_event_not_me("end_drag", card_id)
 
   def on_to_hand(self, card_id):
-    print "to_hand", self, card_id
+    logging.info("to_hand {} {}".format(id(self), card_id))
+    CardNamespace.cards[card_id].backwards = True
+    CardNamespace.table.remove(card_id)
+    CardNamespace.hand.add(card_id)
     self.broadcast_event_not_me("to_hand", card_id)
 
   def on_from_hand(self, card_id, backfacing):
-    print "from_hand", self, card_id
+    logging.info("from_hand {} {}".format(id(self, card_id)))
+    CardNamespace.hand.remove(card_id)
+    CardNamespace.table.add(card_id)
     self.broadcast_event_not_me("from_hand", card_id, backfacing)
 
   def on_move(self, card_id, x, y):
@@ -112,23 +138,13 @@ class CardNamespace(socketio.namespace.BaseNamespace, socketio.mixins.BroadcastM
     self.broadcast_event_not_me("move", card_id, x, y)
 
   def on_flip(self, card_id, backfacing):
-    print "flip", card_id, backfacing
+    logging.info("flip {}".format(card_id))
     self.cards[card_id].backwards = backfacing
     self.broadcast_event_not_me("flip", card_id, backfacing)
 
   def on_reset_game(self):
-    # resets game --> initializes deck and removes cards from players
-    CardNamespace.player_mutex.acquire()
-    CardNamespace.deck_mutex.acquire()
-
-    CardNamespace.deck.initialize_deck()
-    for i in range(len(CardNamespace.players)):
-      CardNamespace.players[i].reset_hand()
-
-    CardNamespace.deck_mutex.release()
-    CardNamespace.player_mutex.release()
-
-    self.broadcast_event_not_me("reset")
+    self.reset_game()
+    self.broadcast_event("set_state", self.get_state())
 
   def on_shuffle_deck(self, player_id):
     CardNamespace.deck_mutex.acquire()
